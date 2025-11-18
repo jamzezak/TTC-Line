@@ -29,8 +29,8 @@
 
     .label {
       color: #ccc;
-      font-size: 0.8rem;
-      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      margin-bottom: 0.7rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
     }
@@ -38,19 +38,19 @@
     /* LED sign */
     .sign {
       background: #000;
-      padding: 0.8rem 1.4rem;
-      border-radius: 10px;
+      padding: 1.1rem 1.8rem;
+      border-radius: 14px;
       box-shadow:
-        0 0 12px rgba(0, 0, 0, 0.9),
-        0 0 18px rgba(0, 0, 0, 0.7);
-      min-width: min(95vw, 520px);
+        0 0 16px rgba(0, 0, 0, 0.9),
+        0 0 22px rgba(0, 0, 0, 0.7);
+      min-width: min(95vw, 720px);
       display: inline-block;
     }
 
     .rows {
       display: flex;
       flex-direction: column;
-      gap: 0.15rem;
+      gap: 0.4rem;
     }
 
     .row {
@@ -58,18 +58,18 @@
       align-items: baseline;
       justify-content: space-between;
       font-family: "Courier New", ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: clamp(1rem, 2.8vw, 1.4rem);
+      font-size: clamp(1.4rem, 4vw, 2.1rem);
       white-space: nowrap;
     }
 
     .row.route-idx-0 {
-      filter: drop-shadow(0 0 6px rgba(0, 220, 255, 0.8));
+      filter: drop-shadow(0 0 8px rgba(0, 220, 255, 0.8));
     }
 
     .route-dest {
       display: flex;
       align-items: baseline;
-      gap: 0.4rem;
+      gap: 0.6rem;
       max-width: 70%;
       overflow: hidden;
     }
@@ -77,34 +77,48 @@
     .route-number {
       font-weight: 700;
       color: #00ff7f; /* bright green */
+      font-size: 1.1em;
     }
 
     .dest-text {
       color: #cce6ff;
       overflow: hidden;
       text-overflow: ellipsis;
+      font-size: 0.9em;
     }
 
     .time {
       display: flex;
       align-items: baseline;
-      gap: 0.35rem;
-      color: #00ff7f;
+      gap: 0.4rem;
       font-weight: 700;
     }
 
+    /* default: green */
     .time .mins {
-      font-size: 1.1em;
+      color: #00ff7f;
+      font-size: 1.6em;  /* BIG digits */
     }
 
     .time .suffix {
-      font-size: 0.65em;
+      font-size: 0.75em;
+      color: #a3e6c4;
+    }
+
+    /* under 5 min = red */
+    .time.urgent .mins {
+      color: #ff4b4b;
+      text-shadow: 0 0 10px rgba(255, 75, 75, 0.8);
+    }
+
+    .time.urgent .suffix {
+      color: #fca5a5;
     }
 
     /* tiny “wifi” icon */
     .wifi {
-      width: 1.1em;
-      height: 1.1em;
+      width: 1.3em;
+      height: 1.3em;
       position: relative;
       display: inline-block;
     }
@@ -127,43 +141,44 @@
     }
 
     .wifi::after {
-      width: 55%;
-      height: 55%;
+      width: 60%;
+      height: 60%;
       top: 18%;
       left: 18%;
     }
 
     .dot {
       position: absolute;
-      width: 0.25em;
-      height: 0.25em;
+      width: 0.3em;
+      height: 0.3em;
       border-radius: 999px;
       background: #00ff7f;
       bottom: 0;
-      right: 0.05em;
+      right: 0.1em;
     }
 
     .footer {
-      margin-top: 0.4rem;
-      font-size: 0.7rem;
+      margin-top: 0.6rem;
+      font-size: 0.8rem;
       color: #aaa;
       font-weight: 400;
       text-align: right;
-      max-width: min(95vw, 520px);
+      max-width: min(95vw, 720px);
       margin-left: auto;
       margin-right: auto;
     }
 
     .status {
-      font-size: 0.7rem;
+      font-size: 0.8rem;
       text-align: left;
       color: #aaa;
+      margin-bottom: 0.2rem;
     }
 
     .status span.dot-status {
       display: inline-block;
-      width: 0.5rem;
-      height: 0.5rem;
+      width: 0.55rem;
+      height: 0.55rem;
       border-radius: 999px;
       margin-right: 0.3rem;
       background: #fbbf24;
@@ -195,12 +210,12 @@
         padding-top: 1.2rem;
       }
       .sign {
-        padding: 0.7rem 1rem;
+        padding: 0.8rem 1.2rem;
         min-width: 0;
         width: 95vw;
       }
       .row {
-        font-size: 1rem;
+        font-size: 1.2rem;
       }
     }
   </style>
@@ -255,33 +270,32 @@
       statusTextEl.textContent = text;
     }
 
-    function formatMinutesFromEpoch(epochSeconds) {
-      if (!epochSeconds) return null;
+    function minutesInfoFromEpoch(epochSeconds) {
+      if (!epochSeconds) return { text: null, value: null };
       const nowMs = Date.now();
       const targetMs = epochSeconds * 1000;
       const diffMin = (targetMs - nowMs) / 60000;
-      if (diffMin < -1) return null; // too far in past
-      if (diffMin <= 0.5) return "<1";
-      return Math.round(diffMin).toString();
+      if (diffMin < -1) return { text: null, value: null }; // too far in past
+      if (diffMin <= 0.5) return { text: "<1", value: diffMin };
+      return { text: Math.round(diffMin).toString(), value: diffMin };
     }
 
     function normalizeTrips(message) {
-      // Expecting { event: "schedule", data: { trips: [...] } }
       if (!message || message.event !== "schedule" || !message.data) return [];
       const trips = Array.isArray(message.data.trips) ? message.data.trips : [];
-      // Map to simpler objects & compute minutes
+
       const mapped = trips.map(t => {
         const arrival = t.arrivalTime || t.departureTime;
-        const mins = formatMinutesFromEpoch(arrival);
+        const minsInfo = minutesInfoFromEpoch(arrival);
         return {
           routeName: t.routeName || "52",
           headsign: t.headsign || "",
           arrivalTime: arrival,
-          minutesText: mins
+          minutesText: minsInfo.text,
+          minutesValue: minsInfo.value
         };
       }).filter(t => t.minutesText !== null);
 
-      // sort by arrival time just in case
       mapped.sort((a, b) => (a.arrivalTime || 0) - (b.arrivalTime || 0));
       return mapped;
     }
@@ -310,19 +324,24 @@
         const row = document.createElement("div");
         row.className = "row route-idx-" + idx;
 
-        // Strip route number from headsign if it appears there, keep destination-ish part
+        // destination
         let dest = trip.headsign || trip.routeName || "Lawrence West";
-        // optional cleanup, not strictly necessary
         dest = dest.replace(/^52[ A-Za-z-]*/i, "").trim() || dest;
 
         const minsText = trip.minutesText;
+        const minsVal = trip.minutesValue;
+
+        // under 5 min -> urgent (red)
+        const urgent = minsVal !== null && minsVal < 5;
+
+        const timeClass = urgent ? "time urgent" : "time";
 
         row.innerHTML = `
           <div class="route-dest">
             <span class="route-number">52</span>
             <span class="dest-text">${dest}</span>
           </div>
-          <div class="time">
+          <div class="${timeClass}">
             <span class="wifi"><span class="dot"></span></span>
             <span class="mins">${minsText}</span><span class="suffix">minutes</span>
           </div>
@@ -354,7 +373,6 @@
             routeStopPairs: ROUTE_STOP_PAIRS,
             limit: LIMIT,
             listMode: LIST_MODE
-            // we keep defaults for arrival vs departure (arrival is default)
           }
         };
 
