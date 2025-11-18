@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>52 Lawrence West – Blackstone LED Board</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: #111; /* wall */
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: #fff;
+    }
+
+    .wrapper {
+      text-align: center;
+      padding: 0.5rem;
+      width: 100%;
+    }
+
+    .label {
+      color: #ccc;
+      font-size: 0.8rem;
+      margin-bottom: 0.5rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    /* LED sign */
+    .sign {
+      background: #000;
+      padding: 0.8rem 1.4rem;
+      border-radius: 10px;
+      box-shadow:
+        0 0 12px rgba(0, 0, 0, 0.9),
+        0 0 18px rgba(0, 0, 0, 0.7);
+      min-width: min(95vw, 520px);
+      display: inline-block;
+    }
+
+    .rows {
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+
+    .row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      font-family: "Courier New", ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: clamp(1rem, 2.8vw, 1.4rem);
+      white-space: nowrap;
+    }
+
+    .row.route-idx-0 {
+      filter: drop-shadow(0 0 6px rgba(0, 220, 255, 0.8));
+    }
+
+    .route-dest {
+      display: flex;
+      align-items: baseline;
+      gap: 0.4rem;
+      max-width: 70%;
+      overflow: hidden;
+    }
+
+    .route-number {
+      font-weight: 700;
+      color: #00ff7f; /* bright green */
+    }
+
+    .dest-text {
+      color: #cce6ff;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .time {
+      display: flex;
+      align-items: baseline;
+      gap: 0.35rem;
+      color: #00ff7f;
+      font-weight: 700;
+    }
+
+    .time .mins {
+      font-size: 1.1em;
+    }
+
+    .time .suffix {
+      font-size: 0.65em;
+    }
+
+    /* tiny “wifi” icon */
+    .wifi {
+      width: 1.1em;
+      height: 1.1em;
+      position: relative;
+      display: inline-block;
+    }
+
+    .wifi::before,
+    .wifi::after {
+      content: "";
+      position: absolute;
+      border: 2px solid #00ff7f;
+      border-radius: 50%;
+      border-color: #00ff7f #00ff7f transparent transparent;
+      transform: rotate(45deg);
+    }
+
+    .wifi::before {
+      width: 100%;
+      height: 100%;
+      top: -5%;
+      left: -5%;
+    }
+
+    .wifi::after {
+      width: 55%;
+      height: 55%;
+      top: 18%;
+      left: 18%;
+    }
+
+    .dot {
+      position: absolute;
+      width: 0.25em;
+      height: 0.25em;
+      border-radius: 999px;
+      background: #00ff7f;
+      bottom: 0;
+      right: 0.05em;
+    }
+
+    .footer {
+      margin-top: 0.4rem;
+      font-size: 0.7rem;
+      color: #aaa;
+      font-weight: 400;
+      text-align: right;
+      max-width: min(95vw, 520px);
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .status {
+      font-size: 0.7rem;
+      text-align: left;
+      color: #aaa;
+    }
+
+    .status span.dot-status {
+      display: inline-block;
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 999px;
+      margin-right: 0.3rem;
+      background: #fbbf24;
+      box-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
+    }
+
+    .status.connected span.dot-status {
+      background: #22c55e;
+      box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
+    }
+
+    .status.error span.dot-status {
+      background: #f97373;
+      box-shadow: 0 0 8px rgba(248, 113, 113, 0.8);
+    }
+
+    .error {
+      color: #ff6b6b;
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+      text-align: left;
+    }
+
+    @media (max-width: 480px) {
+      body {
+        align-items: flex-start;
+      }
+      .wrapper {
+        padding-top: 1.2rem;
+      }
+      .sign {
+        padding: 0.7rem 1rem;
+        min-width: 0;
+        width: 95vw;
+      }
+      .row {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="label">
+      52 Lawrence West · Westbound — Lawrence Ave W at Blackstone St (TTC stop ttc:8556)
+    </div>
+    <div class="sign">
+      <div id="rows" class="rows">
+        <div class="row">
+          <div class="route-dest">
+            <span class="route-number">52</span>
+            <span class="dest-text">Connecting…</span>
+          </div>
+          <div class="time">
+            <span class="wifi"><span class="dot"></span></span>
+            <span class="mins">--</span><span class="suffix">minutes</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <div id="status" class="status">
+        <span class="dot-status"></span><span id="statusText">Connecting to Transit Tracker…</span>
+      </div>
+      Last update: <span id="updatedTime">—</span>
+      <div id="error" class="error" style="display:none;"></div>
+    </div>
+  </div>
+
+  <script>
+    const WS_URL = "wss://tt.horner.tj/";
+    const ROUTE_STOP_PAIRS = "ttc:52,ttc:8556"; // route 52 at TTC GTFS stop 8556 (Blackstone)
+    const LIMIT = 3;                             // show top 3 arrivals
+    const LIST_MODE = "sequential";              // arrivals in time order
+
+    const rowsEl = document.getElementById("rows");
+    const updatedTimeEl = document.getElementById("updatedTime");
+    const errorEl = document.getElementById("error");
+    const statusEl = document.getElementById("status");
+    const statusTextEl = document.getElementById("statusText");
+
+    let ws;
+    let reconnectTimeout = null;
+
+    function setStatus(mode, text) {
+      statusEl.classList.remove("connected", "error");
+      if (mode === "connected") statusEl.classList.add("connected");
+      if (mode === "error") statusEl.classList.add("error");
+      statusTextEl.textContent = text;
+    }
+
+    function formatMinutesFromEpoch(epochSeconds) {
+      if (!epochSeconds) return null;
+      const nowMs = Date.now();
+      const targetMs = epochSeconds * 1000;
+      const diffMin = (targetMs - nowMs) / 60000;
+      if (diffMin < -1) return null; // too far in past
+      if (diffMin <= 0.5) return "<1";
+      return Math.round(diffMin).toString();
+    }
+
+    function normalizeTrips(message) {
+      // Expecting { event: "schedule", data: { trips: [...] } }
+      if (!message || message.event !== "schedule" || !message.data) return [];
+      const trips = Array.isArray(message.data.trips) ? message.data.trips : [];
+      // Map to simpler objects & compute minutes
+      const mapped = trips.map(t => {
+        const arrival = t.arrivalTime || t.departureTime;
+        const mins = formatMinutesFromEpoch(arrival);
+        return {
+          routeName: t.routeName || "52",
+          headsign: t.headsign || "",
+          arrivalTime: arrival,
+          minutesText: mins
+        };
+      }).filter(t => t.minutesText !== null);
+
+      // sort by arrival time just in case
+      mapped.sort((a, b) => (a.arrivalTime || 0) - (b.arrivalTime || 0));
+      return mapped;
+    }
+
+    function renderRows(trips) {
+      rowsEl.innerHTML = "";
+
+      if (!trips.length) {
+        const row = document.createElement("div");
+        row.className = "row";
+        row.innerHTML = `
+          <div class="route-dest">
+            <span class="route-number">52</span>
+            <span class="dest-text">No upcoming buses</span>
+          </div>
+          <div class="time">
+            <span class="wifi"><span class="dot"></span></span>
+            <span class="mins">--</span><span class="suffix">minutes</span>
+          </div>
+        `;
+        rowsEl.appendChild(row);
+        return;
+      }
+
+      trips.slice(0, LIMIT).forEach((trip, idx) => {
+        const row = document.createElement("div");
+        row.className = "row route-idx-" + idx;
+
+        // Strip route number from headsign if it appears there, keep destination-ish part
+        let dest = trip.headsign || trip.routeName || "Lawrence West";
+        // optional cleanup, not strictly necessary
+        dest = dest.replace(/^52[ A-Za-z-]*/i, "").trim() || dest;
+
+        const minsText = trip.minutesText;
+
+        row.innerHTML = `
+          <div class="route-dest">
+            <span class="route-number">52</span>
+            <span class="dest-text">${dest}</span>
+          </div>
+          <div class="time">
+            <span class="wifi"><span class="dot"></span></span>
+            <span class="mins">${minsText}</span><span class="suffix">minutes</span>
+          </div>
+        `;
+
+        rowsEl.appendChild(row);
+      });
+    }
+
+    function connect() {
+      try {
+        ws = new WebSocket(WS_URL);
+      } catch (e) {
+        console.error("WebSocket error:", e);
+        setStatus("error", "Failed to open WebSocket connection");
+        scheduleReconnect();
+        return;
+      }
+
+      setStatus(null, "Connecting to Transit Tracker…");
+
+      ws.addEventListener("open", () => {
+        setStatus("connected", "Connected · live TTC feed");
+        errorEl.style.display = "none";
+
+        const subscribeMsg = {
+          event: "schedule:subscribe",
+          data: {
+            routeStopPairs: ROUTE_STOP_PAIRS,
+            limit: LIMIT,
+            listMode: LIST_MODE
+            // we keep defaults for arrival vs departure (arrival is default)
+          }
+        };
+
+        ws.send(JSON.stringify(subscribeMsg));
+      });
+
+      ws.addEventListener("message", (ev) => {
+        try {
+          const msg = JSON.parse(ev.data);
+          if (msg.event === "schedule") {
+            const trips = normalizeTrips(msg);
+            renderRows(trips);
+
+            const now = new Date();
+            updatedTimeEl.textContent = now.toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit"
+            });
+          }
+        } catch (e) {
+          console.error("Error parsing message:", e);
+        }
+      });
+
+      ws.addEventListener("close", () => {
+        setStatus("error", "Disconnected · retrying…");
+        scheduleReconnect();
+      });
+
+      ws.addEventListener("error", (e) => {
+        console.error("WebSocket error:", e);
+        setStatus("error", "Error talking to Transit Tracker");
+        errorEl.textContent = "Error loading schedule. Check your internet or tt.horner.tj status.";
+        errorEl.style.display = "block";
+        ws.close();
+      });
+    }
+
+    function scheduleReconnect() {
+      if (reconnectTimeout) return;
+      reconnectTimeout = setTimeout(() => {
+        reconnectTimeout = null;
+        connect();
+      }, 5000);
+    }
+
+    connect();
+  </script>
+</body>
+</html>
