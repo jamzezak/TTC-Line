@@ -3,7 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <title>52 Lawrence West – Blackstone LED Board</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Make it behave like a full-screen iOS web app -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-orientation" content="landscape">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+
+  <!-- Optional icon (GitHub will serve this if you add it later)
+  <link rel="apple-touch-icon" href="icon.png">
+  -->
+
   <style>
     * {
       box-sizing: border-box;
@@ -43,7 +53,7 @@
       box-shadow:
         0 0 16px rgba(0, 0, 0, 0.9),
         0 0 22px rgba(0, 0, 0, 0.7);
-      min-width: min(95vw, 720px);
+      width: min(96vw, 900px);
       display: inline-block;
     }
 
@@ -163,7 +173,7 @@
       color: #aaa;
       font-weight: 400;
       text-align: right;
-      max-width: min(95vw, 720px);
+      max-width: min(96vw, 900px);
       margin-left: auto;
       margin-right: auto;
     }
@@ -211,7 +221,6 @@
       }
       .sign {
         padding: 0.8rem 1.2rem;
-        min-width: 0;
         width: 95vw;
       }
       .row {
@@ -251,8 +260,8 @@
   <script>
     const WS_URL = "wss://tt.horner.tj/";
     const ROUTE_STOP_PAIRS = "ttc:52,ttc:8556"; // route 52 at TTC GTFS stop 8556 (Blackstone)
-    const LIMIT = 3;                             // show top 3 arrivals
-    const LIST_MODE = "sequential";              // arrivals in time order
+    const LIMIT = 3;
+    const LIST_MODE = "sequential";
 
     const rowsEl = document.getElementById("rows");
     const updatedTimeEl = document.getElementById("updatedTime");
@@ -275,7 +284,7 @@
       const nowMs = Date.now();
       const targetMs = epochSeconds * 1000;
       const diffMin = (targetMs - nowMs) / 60000;
-      if (diffMin < -1) return { text: null, value: null }; // too far in past
+      if (diffMin < -1) return { text: null, value: null };
       if (diffMin <= 0.5) return { text: "<1", value: diffMin };
       return { text: Math.round(diffMin).toString(), value: diffMin };
     }
@@ -324,16 +333,13 @@
         const row = document.createElement("div");
         row.className = "row route-idx-" + idx;
 
-        // destination
         let dest = trip.headsign || trip.routeName || "Lawrence West";
         dest = dest.replace(/^52[ A-Za-z-]*/i, "").trim() || dest;
 
         const minsText = trip.minutesText;
         const minsVal = trip.minutesValue;
 
-        // under 5 min -> urgent (red)
         const urgent = minsVal !== null && minsVal < 5;
-
         const timeClass = urgent ? "time urgent" : "time";
 
         row.innerHTML = `
