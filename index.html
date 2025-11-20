@@ -8,11 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-orientation" content="landscape">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-
-  <!-- Optional icon (GitHub will serve this if you add it later)
-  <link rel="apple-touch-icon" href="icon.png">
-  -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <style>
     * {
@@ -60,7 +56,7 @@
     .rows {
       display: flex;
       flex-direction: column;
-      gap: 1.4rem;                      /* more spacing between rows */
+      gap: 1.4rem;                      /* spacing between rows */
     }
 
     .row {
@@ -212,7 +208,7 @@
       text-align: left;
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 768px) {
       body {
         align-items: flex-start;
       }
@@ -220,11 +216,26 @@
         padding-top: 1.2rem;
       }
       .sign {
-        padding: 0.8rem 1.2rem;
+        padding: 1.4rem 1.2rem;
         width: 95vw;
+      }
+      .rows {
+        gap: 0.8rem;
+      }
+      .row {
+        font-size: 1.4rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .sign {
+        padding: 1rem 0.9rem;
       }
       .row {
         font-size: 1.2rem;
+      }
+      .dest-text {
+        font-size: 0.8em;
       }
     }
   </style>
@@ -269,14 +280,14 @@
     const statusEl = document.getElementById("status");
     const statusTextEl = document.getElementById("statusText");
 
-    let ws;
+    let ws = null;
     let reconnectTimeout = null;
 
     function setStatus(mode, text) {
       statusEl.classList.remove("connected", "error");
       if (mode === "connected") statusEl.classList.add("connected");
       if (mode === "error") statusEl.classList.add("error");
-      statusTextEl.textContent = text;
+      if (text) statusTextEl.textContent = text;
     }
 
     function minutesInfoFromEpoch(epochSeconds) {
@@ -284,8 +295,13 @@
       const nowMs = Date.now();
       const targetMs = epochSeconds * 1000;
       const diffMin = (targetMs - nowMs) / 60000;
+
+      // Older than ~1 min ago -> ignore
       if (diffMin < -1) return { text: null, value: null };
+
+      // Under ~30 seconds -> show "<1"
       if (diffMin <= 0.5) return { text: "<1", value: diffMin };
+
       return { text: Math.round(diffMin).toString(), value: diffMin };
     }
 
@@ -358,11 +374,17 @@
     }
 
     function connect() {
+      // Clear any old socket just in case
+      if (ws && ws.readyState === WebSocket.OPEN) {
+        try { ws.close(); } catch (e) {}
+      }
+
       try {
         ws = new WebSocket(WS_URL);
       } catch (e) {
-        console.error("WebSocket error:", e);
+        console.error("WebSocket constructor error:", e);
         setStatus("error", "Failed to open WebSocket connection");
+        showError("Error creating WebSocket. Check your internet or tt.horner.tj status.");
         scheduleReconnect();
         return;
       }
@@ -371,7 +393,7 @@
 
       ws.addEventListener("open", () => {
         setStatus("connected", "Connected · live TTC feed");
-        errorEl.style.display = "none";
+        hideError();
 
         const subscribeMsg = {
           event: "schedule:subscribe",
@@ -412,9 +434,8 @@
       ws.addEventListener("error", (e) => {
         console.error("WebSocket error:", e);
         setStatus("error", "Error talking to Transit Tracker");
-        errorEl.textContent = "Error loading schedule. Check your internet or tt.horner.tj status.";
-        errorEl.style.display = "block";
-        ws.close();
+        showError("Error loading schedule. Check your internet or tt.horner.tj status.");
+        try { ws.close(); } catch (_) {}
       });
     }
 
@@ -425,6 +446,25 @@
         connect();
       }, 5000);
     }
+
+    function showError(msg) {
+      errorEl.textContent = msg;
+      errorEl.style.display = "block";
+    }
+
+    function hideError() {
+      errorEl.style.display = "none";
+    }
+
+    // Optional: if user switches back to the page after sleep, try to reconnect
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        // If socket is not open, reconnect
+        if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
+          connect();
+        }
+      }
+    });
 
     connect();
   </script>
