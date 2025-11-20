@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <title>52 Lawrence West – Blackstone LED Board</title>
 
-  <!-- Make it behave like a full-screen iOS web app -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-orientation" content="landscape">
@@ -18,7 +17,7 @@
     }
 
     body {
-      background: #111; /* wall */
+      background: #111;
       height: 100vh;
       display: flex;
       align-items: center;
@@ -41,90 +40,79 @@
       text-transform: uppercase;
     }
 
-    /* LED sign */
     .sign {
       background: #000;
-      padding: 3rem 2rem;              /* taller top & bottom */
+      padding: 2.4rem 2rem;
       border-radius: 14px;
-      box-shadow:
-        0 0 16px rgba(0, 0, 0, 0.9),
-        0 0 22px rgba(0, 0, 0, 0.7);
-      width: min(97vw, 1100px);        /* wider for iPad landscape */
+      box-shadow: 0 0 16px rgba(0,0,0,0.7);
+      width: min(97vw, 1100px);
       display: inline-block;
     }
 
     .rows {
       display: flex;
       flex-direction: column;
-      gap: 1.4rem;                      /* spacing between rows */
+      gap: 1.3rem;
     }
 
+    /* improved alignment */
     .row {
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
-      justify-content: space-between;
       font-family: "Courier New", ui-monospace, SFMono-Regular, Menlo, monospace;
-      font-size: clamp(1.8rem, 4.7vw, 2.7rem);  /* bigger, fills screen better */
+      font-size: clamp(1.8rem, 4.7vw, 2.7rem);
       white-space: nowrap;
-    }
-
-    .row.route-idx-0 {
-      filter: drop-shadow(0 0 8px rgba(0, 220, 255, 0.8));
     }
 
     .route-dest {
       display: flex;
-      align-items: baseline;
-      gap: 0.6rem;
-      max-width: 70%;
+      align-items: center;
+      gap: 0.7rem;
       overflow: hidden;
     }
 
     .route-number {
       font-weight: 700;
-      color: #00ff7f; /* bright green */
-      font-size: 1.1em;
+      color: #00ff7f;
+      font-size: 1.05em;
     }
 
     .dest-text {
       color: #cce6ff;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-size: 0.9em;
+      font-size: 0.88em;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      max-width: 100%;
     }
 
     .time {
       display: flex;
       align-items: baseline;
-      gap: 0.4rem;
+      gap: 0.35rem;
       font-weight: 700;
     }
 
-    /* default: green, now larger */
     .time .mins {
       color: #00ff7f;
-      font-size: 2.2em;                /* bigger digits */
+      font-size: 1.9em;
+    }
+
+    .time.urgent .mins {
+      color: #ff4b4b; /* no glow */
     }
 
     .time .suffix {
-      font-size: 0.85em;
+      font-size: 0.8em;
       color: #a3e6c4;
     }
 
-    /* under 5 min = red */
-    .time.urgent .mins {
-      color: #ff4b4b;
-      text-shadow: 0 0 10px rgba(255, 75, 75, 0.8);
-    }
-
-    .time.urgent .suffix {
-      color: #fca5a5;
-    }
-
-    /* tiny “wifi” icon */
+    /* tiny wifi icon */
     .wifi {
-      width: 1.3em;
-      height: 1.3em;
+      width: 1.2em;
+      height: 1.2em;
       position: relative;
       display: inline-block;
     }
@@ -155,19 +143,18 @@
 
     .dot {
       position: absolute;
-      width: 0.3em;
-      height: 0.3em;
-      border-radius: 999px;
+      width: 0.32em;
+      height: 0.32em;
+      border-radius: 50%;
       background: #00ff7f;
       bottom: 0;
-      right: 0.1em;
+      right: 0.05em;
     }
 
     .footer {
       margin-top: 0.6rem;
       font-size: 0.8rem;
       color: #aaa;
-      font-weight: 400;
       text-align: right;
       max-width: min(96vw, 900px);
       margin-left: auto;
@@ -185,20 +172,17 @@
       display: inline-block;
       width: 0.55rem;
       height: 0.55rem;
-      border-radius: 999px;
+      border-radius: 50%;
       margin-right: 0.3rem;
       background: #fbbf24;
-      box-shadow: 0 0 8px rgba(251, 191, 36, 0.8);
     }
 
     .status.connected span.dot-status {
       background: #22c55e;
-      box-shadow: 0 0 8px rgba(34, 197, 94, 0.8);
     }
 
     .status.error span.dot-status {
       background: #f97373;
-      box-shadow: 0 0 8px rgba(248, 113, 113, 0.8);
     }
 
     .error {
@@ -209,18 +193,8 @@
     }
 
     @media (max-width: 768px) {
-      body {
-        align-items: flex-start;
-      }
-      .wrapper {
-        padding-top: 1.2rem;
-      }
       .sign {
-        padding: 1.4rem 1.2rem;
-        width: 95vw;
-      }
-      .rows {
-        gap: 0.8rem;
+        padding: 1.3rem 1rem;
       }
       .row {
         font-size: 1.4rem;
@@ -228,23 +202,20 @@
     }
 
     @media (max-width: 480px) {
-      .sign {
-        padding: 1rem 0.9rem;
-      }
       .row {
         font-size: 1.2rem;
       }
-      .dest-text {
-        font-size: 0.8em;
-      }
     }
+
   </style>
 </head>
+
 <body>
   <div class="wrapper">
     <div class="label">
       52 Lawrence West · Westbound — Lawrence Ave W at Blackstone St (TTC stop ttc:8556)
     </div>
+
     <div class="sign">
       <div id="rows" class="rows">
         <div class="row">
@@ -254,219 +225,196 @@
           </div>
           <div class="time">
             <span class="wifi"><span class="dot"></span></span>
-            <span class="mins">--</span><span class="suffix">minutes</span>
+            <span class="mins">--</span>
+            <span class="suffix">minutes</span>
           </div>
         </div>
       </div>
     </div>
+
     <div class="footer">
       <div id="status" class="status">
-        <span class="dot-status"></span><span id="statusText">Connecting to Transit Tracker…</span>
+        <span class="dot-status"></span>
+        <span id="statusText">Connecting to Transit Tracker…</span>
       </div>
       Last update: <span id="updatedTime">—</span>
       <div id="error" class="error" style="display:none;"></div>
     </div>
   </div>
 
-  <script>
-    const WS_URL = "wss://tt.horner.tj/";
-    const ROUTE_STOP_PAIRS = "ttc:52,ttc:8556"; // route 52 at TTC GTFS stop 8556 (Blackstone)
-    const LIMIT = 3;
-    const LIST_MODE = "sequential";
+<script>
+  const WS_URL = "wss://tt.horner.tj/";
+  const ROUTE_STOP_PAIRS = "ttc:52,ttc:8556";
+  const LIMIT = 3;
 
-    const rowsEl = document.getElementById("rows");
-    const updatedTimeEl = document.getElementById("updatedTime");
-    const errorEl = document.getElementById("error");
-    const statusEl = document.getElementById("status");
-    const statusTextEl = document.getElementById("statusText");
+  const rowsEl = document.getElementById("rows");
+  const updatedTimeEl = document.getElementById("updatedTime");
+  const errorEl = document.getElementById("error");
+  const statusEl = document.getElementById("status");
+  const statusTextEl = document.getElementById("statusText");
 
-    let ws = null;
-    let reconnectTimeout = null;
+  let ws = null;
+  let reconnectTimeout = null;
 
-    function setStatus(mode, text) {
-      statusEl.classList.remove("connected", "error");
-      if (mode === "connected") statusEl.classList.add("connected");
-      if (mode === "error") statusEl.classList.add("error");
-      if (text) statusTextEl.textContent = text;
-    }
+  function setStatus(mode, text) {
+    statusEl.classList.remove("connected", "error");
+    if (mode === "connected") statusEl.classList.add("connected");
+    if (mode === "error") statusEl.classList.add("error");
+    if (text) statusTextEl.textContent = text;
+  }
 
-    function minutesInfoFromEpoch(epochSeconds) {
-      if (!epochSeconds) return { text: null, value: null };
-      const nowMs = Date.now();
-      const targetMs = epochSeconds * 1000;
-      const diffMin = (targetMs - nowMs) / 60000;
+  function showError(msg) {
+    errorEl.textContent = msg;
+    errorEl.style.display = "block";
+  }
 
-      // Older than ~1 min ago -> ignore
-      if (diffMin < -1) return { text: null, value: null };
+  function hideError() {
+    errorEl.style.display = "none";
+  }
 
-      // Under ~30 seconds -> show "<1"
-      if (diffMin <= 0.5) return { text: "<1", value: diffMin };
+  function minutesInfoFromEpoch(epochSeconds) {
+    if (!epochSeconds) return { text: null, value: null };
+    const now = Date.now();
+    const target = epochSeconds * 1000;
+    const diffMin = (target - now) / 60000;
 
-      return { text: Math.round(diffMin).toString(), value: diffMin };
-    }
+    if (diffMin < -1) return { text: null, value: null };
 
-    function normalizeTrips(message) {
-      if (!message || message.event !== "schedule" || !message.data) return [];
-      const trips = Array.isArray(message.data.trips) ? message.data.trips : [];
+    if (diffMin <= 0.5) return { text: "Due", value: diffMin };
 
-      const mapped = trips.map(t => {
+    return { text: Math.round(diffMin).toString(), value: diffMin };
+  }
+
+  function normalizeTrips(message) {
+    if (!message || message.event !== "schedule" || !message.data) return [];
+    const trips = Array.isArray(message.data.trips) ? message.data.trips : [];
+
+    return trips
+      .map(t => {
         const arrival = t.arrivalTime || t.departureTime;
-        const minsInfo = minutesInfoFromEpoch(arrival);
+        const m = minutesInfoFromEpoch(arrival);
+
         return {
           routeName: t.routeName || "52",
           headsign: t.headsign || "",
           arrivalTime: arrival,
-          minutesText: minsInfo.text,
-          minutesValue: minsInfo.value
+          minutesText: m.text,
+          minutesValue: m.value
         };
-      }).filter(t => t.minutesText !== null);
+      })
+      .filter(t => t.minutesText !== null)
+      .sort((a, b) => a.arrivalTime - b.arrivalTime);
+  }
 
-      mapped.sort((a, b) => (a.arrivalTime || 0) - (b.arrivalTime || 0));
-      return mapped;
-    }
+  function renderRows(trips) {
+    rowsEl.innerHTML = "";
 
-    function renderRows(trips) {
-      rowsEl.innerHTML = "";
-
-      if (!trips.length) {
-        const row = document.createElement("div");
-        row.className = "row";
-        row.innerHTML = `
+    if (!trips.length) {
+      rowsEl.innerHTML = `
+        <div class="row">
           <div class="route-dest">
             <span class="route-number">52</span>
             <span class="dest-text">No upcoming buses</span>
           </div>
           <div class="time">
             <span class="wifi"><span class="dot"></span></span>
-            <span class="mins">--</span><span class="suffix">minutes</span>
+            <span class="mins">--</span>
+            <span class="suffix">minutes</span>
           </div>
-        `;
-        rowsEl.appendChild(row);
-        return;
-      }
-
-      trips.slice(0, LIMIT).forEach((trip, idx) => {
-        const row = document.createElement("div");
-        row.className = "row route-idx-" + idx;
-
-        let dest = trip.headsign || trip.routeName || "Lawrence West";
-        dest = dest.replace(/^52[ A-Za-z-]*/i, "").trim() || dest;
-
-        const minsText = trip.minutesText;
-        const minsVal = trip.minutesValue;
-
-        const urgent = minsVal !== null && minsVal < 5;
-        const timeClass = urgent ? "time urgent" : "time";
-
-        row.innerHTML = `
-          <div class="route-dest">
-            <span class="route-number">52</span>
-            <span class="dest-text">${dest}</span>
-          </div>
-          <div class="${timeClass}">
-            <span class="wifi"><span class="dot"></span></span>
-            <span class="mins">${minsText}</span><span class="suffix">minutes</span>
-          </div>
-        `;
-
-        rowsEl.appendChild(row);
-      });
+        </div>`;
+      return;
     }
 
-    function connect() {
-      // Clear any old socket just in case
-      if (ws && ws.readyState === WebSocket.OPEN) {
-        try { ws.close(); } catch (e) {}
-      }
+    trips.slice(0, LIMIT).forEach((trip, idx) => {
+      const urgent = trip.minutesValue < 5;
+      const showMinutesWord = trip.minutesText !== "Due";
 
+      let dest = trip.headsign.replace(/^52[ A-Za-z-]*/i, "").trim();
+      if (!dest) dest = trip.headsign;
+
+      const row = document.createElement("div");
+      row.className = "row";
+
+      row.innerHTML = `
+        <div class="route-dest">
+          <span class="route-number">52</span>
+          <span class="dest-text">${dest}</span>
+        </div>
+
+        <div class="time ${urgent ? "urgent" : ""}">
+          <span class="wifi"><span class="dot"></span></span>
+          <span class="mins">${trip.minutesText}</span>
+          ${showMinutesWord ? `<span class="suffix">minutes</span>` : ""}
+        </div>`;
+
+      rowsEl.appendChild(row);
+    });
+  }
+
+  function connect() {
+    try {
+      ws = new WebSocket(WS_URL);
+    } catch (e) {
+      setStatus("error", "WebSocket failed");
+      showError("Could not open WebSocket connection.");
+      return scheduleReconnect();
+    }
+
+    setStatus(null, "Connecting…");
+
+    ws.addEventListener("open", () => {
+      setStatus("connected", "Connected · live TTC feed");
+      hideError();
+
+      ws.send(JSON.stringify({
+        event: "schedule:subscribe",
+        data: { routeStopPairs: ROUTE_STOP_PAIRS, limit: LIMIT, listMode: "sequential" }
+      }));
+    });
+
+    ws.addEventListener("message", ev => {
       try {
-        ws = new WebSocket(WS_URL);
+        const msg = JSON.parse(ev.data);
+        if (msg.event === "schedule") {
+          const trips = normalizeTrips(msg);
+          renderRows(trips);
+
+          updatedTimeEl.textContent =
+            new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+        }
       } catch (e) {
-        console.error("WebSocket constructor error:", e);
-        setStatus("error", "Failed to open WebSocket connection");
-        showError("Error creating WebSocket. Check your internet or tt.horner.tj status.");
-        scheduleReconnect();
-        return;
-      }
-
-      setStatus(null, "Connecting to Transit Tracker…");
-
-      ws.addEventListener("open", () => {
-        setStatus("connected", "Connected · live TTC feed");
-        hideError();
-
-        const subscribeMsg = {
-          event: "schedule:subscribe",
-          data: {
-            routeStopPairs: ROUTE_STOP_PAIRS,
-            limit: LIMIT,
-            listMode: LIST_MODE
-          }
-        };
-
-        ws.send(JSON.stringify(subscribeMsg));
-      });
-
-      ws.addEventListener("message", (ev) => {
-        try {
-          const msg = JSON.parse(ev.data);
-          if (msg.event === "schedule") {
-            const trips = normalizeTrips(msg);
-            renderRows(trips);
-
-            const now = new Date();
-            updatedTimeEl.textContent = now.toLocaleTimeString([], {
-              hour: "2-digit",
-              minute: "2-digit",
-              second: "2-digit"
-            });
-          }
-        } catch (e) {
-          console.error("Error parsing message:", e);
-        }
-      });
-
-      ws.addEventListener("close", () => {
-        setStatus("error", "Disconnected · retrying…");
-        scheduleReconnect();
-      });
-
-      ws.addEventListener("error", (e) => {
-        console.error("WebSocket error:", e);
-        setStatus("error", "Error talking to Transit Tracker");
-        showError("Error loading schedule. Check your internet or tt.horner.tj status.");
-        try { ws.close(); } catch (_) {}
-      });
-    }
-
-    function scheduleReconnect() {
-      if (reconnectTimeout) return;
-      reconnectTimeout = setTimeout(() => {
-        reconnectTimeout = null;
-        connect();
-      }, 5000);
-    }
-
-    function showError(msg) {
-      errorEl.textContent = msg;
-      errorEl.style.display = "block";
-    }
-
-    function hideError() {
-      errorEl.style.display = "none";
-    }
-
-    // Optional: if user switches back to the page after sleep, try to reconnect
-    document.addEventListener("visibilitychange", () => {
-      if (document.visibilityState === "visible") {
-        // If socket is not open, reconnect
-        if (!ws || ws.readyState === WebSocket.CLOSED || ws.readyState === WebSocket.CLOSING) {
-          connect();
-        }
+        console.error("Parse error:", e);
       }
     });
 
-    connect();
-  </script>
+    ws.addEventListener("close", () => {
+      setStatus("error", "Disconnected · retrying…");
+      scheduleReconnect();
+    });
+
+    ws.addEventListener("error", () => {
+      setStatus("error", "Error communicating");
+      showError("Error talking to Transit Tracker.");
+      ws.close();
+    });
+  }
+
+  function scheduleReconnect() {
+    if (reconnectTimeout) return;
+    reconnectTimeout = setTimeout(() => {
+      reconnectTimeout = null;
+      connect();
+    }, 5000);
+  }
+
+  connect();
+
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") {
+      if (!ws || ws.readyState >= 2) connect();
+    }
+  });
+</script>
+
 </body>
 </html>
