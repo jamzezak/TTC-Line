@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>52 Lawrence West – Blackstone LED Board</title>
+  <title>52 Lawrence West – LED Board</title>
 
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -10,11 +10,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       background: #111;
@@ -34,13 +30,12 @@
       margin: 0 auto;
     }
 
-    /* header: route label left, weather right */
+    /* HEADER (Route left, weather right) */
     .header {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       justify-content: space-between;
-      gap: 1rem;
-      margin-bottom: 0.5rem;
+      margin-bottom: 0.6rem;
     }
 
     .header-left {
@@ -48,19 +43,51 @@
       font-size: 0.9rem;
       letter-spacing: 0.08em;
       text-transform: uppercase;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
+    /* WEATHER PILL */
     .weather {
-      font-size: 0.9rem;
-      color: #a5f3fc;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      display: flex;
+      justify-content: flex-end;
     }
 
+    .weather-card {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.3rem 0.9rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: radial-gradient(circle at top left, #1f2933 0%, #020617 60%);
+      font-size: 0.85rem;
+      color: #e5f4ff;
+      white-space: nowrap;
+    }
+
+    .weather-icon {
+      font-size: 1rem;
+    }
+
+    .weather-temp {
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+
+    .weather-desc { opacity: 0.95; }
+
+    .weather-meta {
+      font-size: 0.7rem;
+      opacity: 0.8;
+    }
+
+    /* subtle border color variants */
+    .weather-clear { border-color: rgba(56, 189, 248, 0.7); }
+    .weather-cloudy { border-color: rgba(148, 163, 184, 0.8); }
+    .weather-rain { border-color: rgba(96, 165, 250, 0.9); }
+    .weather-snow { border-color: rgba(191, 219, 254, 0.9); }
+    .weather-storm { border-color: rgba(251, 146, 60, 0.9); }
+
+    /* SIGN BODY */
     .sign {
       background: #000;
       padding: 2.4rem 2rem;
@@ -76,21 +103,21 @@
       gap: 1.3rem;
     }
 
-    /* nice alignment */
+    /* BUS ROWS */
     .row {
       display: grid;
       grid-template-columns: minmax(0, 1fr) auto;
       align-items: center;
-      font-family: "Courier New", ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-family: "Courier New", ui-monospace, Menlo, monospace;
       font-size: clamp(1.8rem, 4.7vw, 2.7rem);
       white-space: nowrap;
     }
 
     .route-dest {
       display: flex;
-      align-items: center;
       gap: 0.7rem;
       overflow: hidden;
+      align-items: center;
     }
 
     .route-number {
@@ -103,15 +130,14 @@
       color: #cce6ff;
       overflow: hidden;
       text-overflow: ellipsis;
-      font-size: 0.88em;
+      font-size: 0.9em;
       letter-spacing: 0.06em;
       text-transform: uppercase;
-      max-width: 100%;
     }
 
     .time {
       display: flex;
-      align-items: baseline;
+      align-items: center;
       gap: 0.35rem;
       font-weight: 700;
     }
@@ -122,12 +148,7 @@
     }
 
     .time.urgent .mins {
-      color: #ff4b4b; /* under 5 minutes, still no glow */
-    }
-
-    .time .suffix {
-      font-size: 0.8em;
-      color: #a3e6c4;
+      color: #ff4b4b; /* no glow */
     }
 
     .time .mins.due {
@@ -135,16 +156,19 @@
       letter-spacing: 0.05em;
     }
 
-    /* tiny wifi icon */
+    .time .suffix {
+      font-size: 0.8em;
+      color: #a3e6c4;
+    }
+
+    /* Tiny Wifi radio icon */
     .wifi {
       width: 1.2em;
       height: 1.2em;
       position: relative;
-      display: inline-block;
     }
 
-    .wifi::before,
-    .wifi::after {
+    .wifi::before, .wifi::after {
       content: "";
       position: absolute;
       border: 2px solid #00ff7f;
@@ -153,19 +177,8 @@
       transform: rotate(45deg);
     }
 
-    .wifi::before {
-      width: 100%;
-      height: 100%;
-      top: -5%;
-      left: -5%;
-    }
-
-    .wifi::after {
-      width: 60%;
-      height: 60%;
-      top: 18%;
-      left: 18%;
-    }
+    .wifi::before { width: 100%; height: 100%; top: -5%; left: -5%; }
+    .wifi::after { width: 60%; height: 60%; top: 18%; left: 18%; }
 
     .dot {
       position: absolute;
@@ -173,90 +186,54 @@
       height: 0.32em;
       border-radius: 50%;
       background: #00ff7f;
-      bottom: 0;
-      right: 0.05em;
+      bottom: 0; right: 0.05em;
     }
 
+    /* FOOTER */
     .footer {
       margin-top: 0.6rem;
       font-size: 0.8rem;
       color: #aaa;
       text-align: right;
-      max-width: 100%;
-    }
-
-    .status {
-      font-size: 0.8rem;
-      text-align: left;
-      color: #aaa;
-      margin-bottom: 0.2rem;
     }
 
     .status span.dot-status {
-      display: inline-block;
       width: 0.55rem;
       height: 0.55rem;
       border-radius: 50%;
+      display: inline-block;
       margin-right: 0.3rem;
       background: #fbbf24;
     }
 
-    .status.connected span.dot-status {
-      background: #22c55e;
-    }
-
-    .status.error span.dot-status {
-      background: #f97373;
-    }
+    .status.connected span.dot-status { background: #22c55e; }
+    .status.error span.dot-status { background: #f97373; }
 
     .error {
       color: #ff6b6b;
-      margin-top: 0.25rem;
+      margin-top: 0.2rem;
       font-size: 0.75rem;
-      text-align: left;
     }
 
     @media (max-width: 768px) {
-      .sign {
-        padding: 1.3rem 1rem;
-      }
-      .row {
-        font-size: 1.4rem;
-      }
-      .header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
-      .weather {
-        font-size: 0.8rem;
-      }
+      .sign { padding: 1.3rem 1rem; }
+      .row { font-size: 1.4rem; }
+      .header { flex-direction: column; align-items: flex-start; }
     }
 
     @media (max-width: 480px) {
-      .row {
-        font-size: 1.2rem;
-      }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      * {
-        animation-duration: 0.001ms !important;
-        animation-iteration-count: 1 !important;
-        transition: none !important;
-      }
+      .row { font-size: 1.2rem; }
+      .weather-card { font-size: 0.75rem; padding: 0.25rem 0.6rem; }
     }
   </style>
 </head>
+
 <body>
   <div class="wrapper">
-
+    
     <div class="header">
-      <div class="header-left">
-        52 Lawrence West · Westbound
-      </div>
-      <div id="weather" class="weather">
-        Weather: —
-      </div>
+      <div class="header-left">52 Lawrence West · Westbound</div>
+      <div id="weather" class="weather"></div>
     </div>
 
     <div class="sign">
@@ -278,24 +255,22 @@
     <div class="footer">
       <div id="status" class="status">
         <span class="dot-status"></span>
-        <span id="statusText">Connecting to Transit Tracker…</span>
+        <span id="statusText">Connecting…</span>
       </div>
-      Last update: <span id="updatedTime">—</span>
-      <span id="updatedAgo"></span>
+      Last update: <span id="updatedTime">—</span> <span id="updatedAgo"></span>
       <div id="error" class="error" style="display:none;"></div>
     </div>
+
   </div>
 
 <script>
   const WS_URL = "wss://tt.horner.tj/";
   const ROUTE_STOP_PAIRS = "ttc:52,ttc:8556";
   const LIMIT = 3;
-
-  // Simple weather via Open-Meteo (Toronto-ish coords near Lawrence/Blackstone)
-  // You can tweak latitude/longitude if you want it exact.
+  
+  /* Toronto-ish lat/lon */
   const WEATHER_URL =
-    "https://api.open-meteo.com/v1/forecast" +
-    "?latitude=43.72&longitude=-79.49&current_weather=true&timezone=auto";
+    "https://api.open-meteo.com/v1/forecast?latitude=43.72&longitude=-79.49&current_weather=true&timezone=auto";
 
   const rowsEl = document.getElementById("rows");
   const updatedTimeEl = document.getElementById("updatedTime");
@@ -308,39 +283,52 @@
   let ws = null;
   let reconnectTimeout = null;
   let lastUpdateMs = null;
-  window.lastTrips = null; // optional reuse
 
-  function setStatus(mode, text) {
-    statusEl.classList.remove("connected", "error");
-    if (mode === "connected") statusEl.classList.add("connected");
-    if (mode === "error") statusEl.classList.add("error");
-    if (text) statusTextEl.textContent = text;
+  /* --- WEATHER MAPPING --- */
+
+  function weatherInfoFromCode(code) {
+    let label = "Mixed", variant = "cloudy", icon = "🌡️";
+
+    if (code === 0) { label = "Clear"; icon = "☀️"; variant = "clear"; }
+    else if (code <= 2) { label = "Partly cloudy"; icon = "🌤️"; variant = "clear"; }
+    else if (code === 3) { label = "Cloudy"; icon = "☁️"; variant = "cloudy"; }
+    else if (code >= 45 && code <= 48) { label = "Foggy"; icon = "🌫️"; variant = "cloudy"; }
+    else if (code >= 51 && code <= 67) { label = "Drizzle / Rain"; icon = "🌧️"; variant = "rain"; }
+    else if (code >= 71 && code <= 77) { label = "Snow"; icon = "❄️"; variant = "snow"; }
+    else if (code >= 80 && code <= 82) { label = "Showers"; icon = "🌦️"; variant = "rain"; }
+    else if (code >= 95) { label = "Storm"; icon = "⛈️"; variant = "storm"; }
+
+    return { label, variant, icon };
   }
 
-  function showError(msg) {
-    errorEl.textContent = msg;
-    errorEl.style.display = "block";
+  function fetchWeather() {
+    fetch(WEATHER_URL)
+      .then(res => res.json())
+      .then(data => {
+        if (!data?.current_weather) return;
+        const cw = data.current_weather;
+        const info = weatherInfoFromCode(cw.weathercode);
+
+        const temp = Math.round(cw.temperature);
+        const wind = Math.round(cw.windspeed);
+
+        weatherEl.innerHTML = `
+          <div class="weather-card weather-${info.variant}">
+            <span class="weather-icon">${info.icon}</span>
+            <span class="weather-temp">${temp}°C</span>
+            <span class="weather-desc">${info.label}</span>
+            <span class="weather-meta">· wind ${wind} km/h</span>
+          </div>
+        `;
+      })
+      .catch(() => {});
   }
 
-  function hideError() {
-    errorEl.style.display = "none";
-  }
-
-  function updateAgo() {
-    if (!lastUpdateMs) {
-      updatedAgoEl.textContent = "";
-      return;
-    }
-    const diffSec = Math.round((Date.now() - lastUpdateMs) / 1000);
-    const label = diffSec < 60 ? `${diffSec}s ago` : `${Math.round(diffSec / 60)} min ago`;
-    updatedAgoEl.textContent = `· ${label}`;
-  }
-  setInterval(updateAgo, 1000);
-
-  function minutesInfoFromEpoch(epochSeconds) {
-    if (!epochSeconds) return { text: null, value: null };
+  /* --- TTC MINUTES CALC --- */
+  function minutesInfoFromEpoch(epoch) {
+    if (!epoch) return { text: null, value: null };
     const now = Date.now();
-    const target = epochSeconds * 1000;
+    const target = epoch * 1000;
     const diffMin = (target - now) / 60000;
 
     if (diffMin < -1) return { text: null, value: null };
@@ -349,16 +337,14 @@
     return { text: Math.round(diffMin).toString(), value: diffMin };
   }
 
-  function normalizeTrips(message) {
-    if (!message || message.event !== "schedule" || !message.data) return [];
-    const trips = Array.isArray(message.data.trips) ? message.data.trips : [];
+  function normalizeTrips(msg) {
+    if (!msg || msg.event !== "schedule") return [];
 
-    return trips
+    return (msg.data.trips || [])
       .map(t => {
         const arrival = t.arrivalTime || t.departureTime;
         const m = minutesInfoFromEpoch(arrival);
         return {
-          routeName: t.routeName || "52",
           headsign: t.headsign || "",
           arrivalTime: arrival,
           minutesText: m.text,
@@ -369,8 +355,8 @@
       .sort((a, b) => a.arrivalTime - b.arrivalTime);
   }
 
+  /* --- RENDERING --- */
   function renderRows(trips) {
-    window.lastTrips = trips;
     rowsEl.innerHTML = "";
 
     if (!trips.length) {
@@ -389,7 +375,7 @@
       return;
     }
 
-    trips.slice(0, LIMIT).forEach((trip) => {
+    trips.slice(0, LIMIT).forEach(trip => {
       const urgent = trip.minutesValue < 5;
       const isDue = trip.minutesText === "Due";
       const showMinutesWord = !isDue;
@@ -400,8 +386,6 @@
       const row = document.createElement("div");
       row.className = "row";
 
-      const minsClass = isDue ? "mins due" : "mins";
-
       row.innerHTML = `
         <div class="route-dest">
           <span class="route-number">52</span>
@@ -409,115 +393,70 @@
         </div>
         <div class="time ${urgent ? "urgent" : ""}">
           <span class="wifi"><span class="dot"></span></span>
-          <span class="${minsClass}">${trip.minutesText}</span>
+          <span class="mins ${isDue ? "due" : ""}">${trip.minutesText}</span>
           ${showMinutesWord ? `<span class="suffix">minutes</span>` : ""}
-        </div>`;
+        </div>
+      `;
 
       rowsEl.appendChild(row);
     });
   }
 
-  function connect() {
-    try {
-      ws = new WebSocket(WS_URL);
-    } catch (e) {
-      setStatus("error", "WebSocket failed");
-      showError("Could not open WebSocket connection.");
-      return scheduleReconnect();
-    }
+  /* --- STATUS + LIVE UPDATES --- */
 
-    setStatus(null, "Connecting…");
+  function updateAgo() {
+    if (!lastUpdateMs) return updatedAgoEl.textContent = "";
+    const diffSec = Math.round((Date.now() - lastUpdateMs) / 1000);
+    const label = diffSec < 60 ? `${diffSec}s ago` : `${Math.round(diffSec/60)} min ago`;
+    updatedAgoEl.textContent = "· " + label;
+  }
+  setInterval(updateAgo, 1000);
+
+  function connect() {
+    try { ws = new WebSocket(WS_URL); }
+    catch { return setTimeout(connect, 5000); }
+
+    statusTextEl.textContent = "Connecting…";
 
     ws.addEventListener("open", () => {
-      setStatus("connected", "Connected · live TTC feed");
-      hideError();
-
+      statusEl.classList.add("connected");
       ws.send(JSON.stringify({
         event: "schedule:subscribe",
-        data: { routeStopPairs: ROUTE_STOP_PAIRS, limit: LIMIT, listMode: "sequential" }
+        data: { routeStopPairs: ROUTE_STOP_PAIRS, limit: LIMIT }
       }));
     });
 
     ws.addEventListener("message", ev => {
-      try {
-        const msg = JSON.parse(ev.data);
-        if (msg.event === "schedule") {
-          const trips = normalizeTrips(msg);
-          renderRows(trips);
+      const msg = JSON.parse(ev.data);
+      if (msg.event === "schedule") {
+        const trips = normalizeTrips(msg);
+        renderRows(trips);
 
-          const now = new Date();
-          lastUpdateMs = now.getTime();
-          updatedTimeEl.textContent = now.toLocaleTimeString([], {
-            hour: "2-digit", minute: "2-digit", second: "2-digit"
-          });
-          updateAgo();
-        }
-      } catch (e) {
-        console.error("Parse error:", e);
+        const now = new Date();
+        lastUpdateMs = now.getTime();
+        updatedTimeEl.textContent = now.toLocaleTimeString([], {
+          hour: "2-digit", minute: "2-digit", second: "2-digit"
+        });
       }
     });
 
     ws.addEventListener("close", () => {
-      setStatus("error", "Disconnected · retrying…");
-      scheduleReconnect();
+      statusEl.classList.add("error");
+      statusTextEl.textContent = "Disconnected · retrying…";
+      setTimeout(connect, 5000);
     });
 
     ws.addEventListener("error", () => {
-      setStatus("error", "Error communicating");
-      showError("Error talking to Transit Tracker.");
+      statusEl.classList.add("error");
+      statusTextEl.textContent = "Error communicating";
       ws.close();
     });
   }
 
-  function scheduleReconnect() {
-    if (reconnectTimeout) return;
-    reconnectTimeout = setTimeout(() => {
-      reconnectTimeout = null;
-      connect();
-    }, 5000);
-  }
-
-  // --- Weather bits ---
-
-  function weatherCodeToText(code) {
-    // Simplified mapping for Open-Meteo weathercode
-    if (code === 0) return "Clear";
-    if (code === 1 || code === 2) return "Partly cloudy";
-    if (code === 3) return "Cloudy";
-    if (code >= 45 && code <= 48) return "Foggy";
-    if (code >= 51 && code <= 67) return "Drizzle / Rain";
-    if (code >= 71 && code <= 77) return "Snow";
-    if (code >= 80 && code <= 82) return "Showers";
-    if (code >= 95 && code <= 99) return "Thunderstorms";
-    return "Mixed";
-  }
-
-  function fetchWeather() {
-    fetch(WEATHER_URL)
-      .then(res => res.json())
-      .then(data => {
-        if (!data || !data.current_weather) return;
-        const cw = data.current_weather;
-        const temp = Math.round(cw.temperature);
-        const wind = Math.round(cw.windspeed);
-        const desc = weatherCodeToText(cw.weathercode);
-        weatherEl.textContent = `Weather: ${temp}°C · ${desc} · wind ${wind} km/h`;
-      })
-      .catch(() => {
-        // fail silently: keep old text
-      });
-  }
-
   connect();
   fetchWeather();
-  setInterval(fetchWeather, 10 * 60 * 1000); // refresh every 10 min
+  setInterval(fetchWeather, 1000 * 60 * 10);
 
-  document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "visible") {
-      if (!ws || ws.readyState >= 2) connect();
-      fetchWeather();
-    }
-  });
 </script>
 
 </body>
