@@ -81,7 +81,7 @@
     }
 
     /* subtle border color variants */
-    .weather-clear { border-color: rgba(56, 189, 248, 0.7); }
+    .weather-clear  { border-color: rgba(56, 189, 248, 0.7); }
     .weather-cloudy { border-color: rgba(148, 163, 184, 0.8); }
     .weather-rain   { border-color: rgba(96, 165, 250, 0.9); }
     .weather-snow   { border-color: rgba(191, 219, 254, 0.9); }
@@ -126,13 +126,30 @@
       font-size: 1.05em;
     }
 
-    .dest-text {
-      color: #cce6ff;
+    /* scrolling destination text */
+    .dest-text-viewport {
       overflow: hidden;
-      text-overflow: ellipsis;
+      max-width: 100%;
+    }
+
+    .dest-text-inner {
+      display: inline-block;
+      white-space: nowrap;
+      color: #cce6ff;
       font-size: 0.9em;
       letter-spacing: 0.06em;
       text-transform: uppercase;
+    }
+
+    .dest-text-inner.scrolling {
+      animation: scroll-text 12s linear infinite;
+    }
+
+    @keyframes scroll-text {
+      0%   { transform: translateX(0); }
+      10%  { transform: translateX(0); }
+      90%  { transform: translateX(var(--scroll-end, 0)); }
+      100% { transform: translateX(var(--scroll-end, 0)); }
     }
 
     .time {
@@ -217,13 +234,13 @@
     }
 
     @media (max-width: 768px) {
-      .sign { padding: 1.3rem 1rem; }
-      .row  { font-size: 1.4rem; }
+      .sign   { padding: 1.3rem 1rem; }
+      .row    { font-size: 1.4rem; }
       .header { flex-direction: column; align-items: flex-start; }
     }
 
     @media (max-width: 480px) {
-      .row { font-size: 1.2rem; }
+      .row          { font-size: 1.2rem; }
       .weather-card { font-size: 0.75rem; padding: 0.25rem 0.6rem; }
     }
   </style>
@@ -232,7 +249,7 @@
 <body>
   <div class="wrapper">
     <div class="header">
-      <div class="header-left">52 Lawrence West · Westbound</div>
+      <div class="header-left">52 LAWRENCE WEST · WESTBOUND</div>
       <div id="weather" class="weather"></div>
     </div>
 
@@ -241,7 +258,9 @@
         <div class="row">
           <div class="route-dest">
             <span class="route-number">52</span>
-            <span class="dest-text">Connecting…</span>
+            <div class="dest-text-viewport">
+              <span class="dest-text-inner">Connecting…</span>
+            </div>
           </div>
           <div class="time">
             <span class="wifi"><span class="dot"></span></span>
@@ -288,14 +307,14 @@
   function weatherInfoFromCode(code) {
     let label = "Mixed", variant = "cloudy", icon = "🌡️";
 
-    if (code === 0)             { label = "Clear";          icon = "☀️"; variant = "clear"; }
-    else if (code <= 2)         { label = "Partly cloudy";  icon = "🌤️"; variant = "clear"; }
-    else if (code === 3)        { label = "Cloudy";         icon = "☁️"; variant = "cloudy"; }
-    else if (code >= 45 && code <= 48) { label = "Foggy";   icon = "🌫️"; variant = "cloudy"; }
+    if (code === 0)                    { label = "Clear";          icon = "☀️"; variant = "clear"; }
+    else if (code <= 2)                { label = "Partly cloudy";  icon = "🌤️"; variant = "clear"; }
+    else if (code === 3)               { label = "Cloudy";         icon = "☁️"; variant = "cloudy"; }
+    else if (code >= 45 && code <= 48) { label = "Foggy";          icon = "🌫️"; variant = "cloudy"; }
     else if (code >= 51 && code <= 67) { label = "Drizzle / Rain"; icon = "🌧️"; variant = "rain"; }
-    else if (code >= 71 && code <= 77) { label = "Snow";    icon = "❄️"; variant = "snow"; }
-    else if (code >= 80 && code <= 82) { label = "Showers"; icon = "🌦️"; variant = "rain"; }
-    else if (code >= 95)               { label = "Storm";   icon = "⛈️"; variant = "storm"; }
+    else if (code >= 71 && code <= 77) { label = "Snow";           icon = "❄️"; variant = "snow"; }
+    else if (code >= 80 && code <= 82) { label = "Showers";        icon = "🌦️"; variant = "rain"; }
+    else if (code >= 95)               { label = "Storm";          icon = "⛈️"; variant = "storm"; }
 
     return { label, variant, icon };
   }
@@ -333,7 +352,7 @@
     const targetMs = epochSeconds * 1000;
     const diffMin  = (targetMs - nowMs) / 60000;
 
-    if (diffMin < -1)  return { text: null, value: null };
+    if (diffMin < -1)   return { text: null, value: null };
     if (diffMin <= 0.5) return { text: "Due", value: diffMin };
 
     return { text: Math.round(diffMin).toString(), value: diffMin };
@@ -359,6 +378,26 @@
       .sort((a, b) => a.arrivalTime - b.arrivalTime);
   }
 
+  /* -------- MARQUEE SETUP -------- */
+
+  function setupMarqueeForRow(rowEl) {
+    const viewport = rowEl.querySelector(".dest-text-viewport");
+    const inner    = rowEl.querySelector(".dest-text-inner");
+    if (!viewport || !inner) return;
+
+    // force layout so scrollWidth is correct
+    const extra = inner.scrollWidth - viewport.clientWidth;
+
+    if (extra > 8) {
+      const distance = -(extra + 16); // a bit of padding at the end
+      inner.style.setProperty("--scroll-end", distance + "px");
+      inner.classList.add("scrolling");
+    } else {
+      inner.classList.remove("scrolling");
+      inner.style.removeProperty("--scroll-end");
+    }
+  }
+
   /* -------- RENDERING -------- */
 
   function renderRows(trips) {
@@ -369,7 +408,9 @@
         <div class="row">
           <div class="route-dest">
             <span class="route-number">52</span>
-            <span class="dest-text">No upcoming buses</span>
+            <div class="dest-text-viewport">
+              <span class="dest-text-inner">No upcoming buses</span>
+            </div>
           </div>
           <div class="time">
             <span class="wifi"><span class="dot"></span></span>
@@ -377,6 +418,9 @@
             <span class="suffix">minutes</span>
           </div>
         </div>`;
+
+      const firstRow = rowsEl.firstElementChild;
+      if (firstRow) setupMarqueeForRow(firstRow);
       return;
     }
 
@@ -394,7 +438,9 @@
       row.innerHTML = `
         <div class="route-dest">
           <span class="route-number">52</span>
-          <span class="dest-text">${dest}</span>
+          <div class="dest-text-viewport">
+            <span class="dest-text-inner">${dest}</span>
+          </div>
         </div>
         <div class="time ${urgent ? "urgent" : ""}">
           <span class="wifi"><span class="dot"></span></span>
@@ -404,6 +450,7 @@
       `;
 
       rowsEl.appendChild(row);
+      setupMarqueeForRow(row);
     });
   }
 
@@ -435,17 +482,14 @@
       return;
     }
 
-    // initial state while opening
     statusEl.classList.remove("error", "connected");
     statusTextEl.textContent = "Connecting…";
 
     ws.addEventListener("open", () => {
-      // mark as connected
       statusEl.classList.remove("error");
       statusEl.classList.add("connected");
       statusTextEl.textContent = "Connected · live TTC feed";
 
-      // subscribe
       ws.send(JSON.stringify({
         event: "schedule:subscribe",
         data: { routeStopPairs: ROUTE_STOP_PAIRS, limit: LIMIT, listMode: "sequential" }
@@ -454,7 +498,7 @@
 
     ws.addEventListener("message", ev => {
       try {
-        const msg   = JSON.parse(ev.data);
+        const msg = JSON.parse(ev.data);
         if (msg.event !== "schedule") return;
 
         const trips = normalizeTrips(msg);
@@ -487,7 +531,7 @@
 
   connect();
   fetchWeather();
-  setInterval(fetchWeather, 10 * 60 * 1000); // refresh every 10 minutes
+  setInterval(fetchWeather, 10 * 60 * 1000); // refresh weather every 10 minutes
 </script>
 </body>
 </html>
